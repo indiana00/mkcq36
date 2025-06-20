@@ -1,0 +1,2447 @@
+<!-- <!DOCTYPE html> -->
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartPantry 食物管家</title>
+  <meta name="description" content="SmartPantry - 食物管家，整合掃描、管理、食譜 AI 生成、食物分享市集與個人檔案的健康生活平台。">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --main: #55b584;
+      --main-dark: #3f8e63;
+      --bg: #f7fdfb;
+      --white: #fff;
+      --accent: #ffb95e;
+      --accent-dark: #ea9c28;
+      --error: #f44336;
+      --text: #232323;
+      --shadow: 0 6px 24px rgba(85,181,132,0.10), 0 1.5px 6px rgba(0,0,0,0.05);
+      --radius: 18px;
+      --transition: 0.18s cubic-bezier(.4,2,.6,1);
+      --glass: rgba(255,255,255,0.65);
+      --tabbar-glass: rgba(255,255,255,0.92);
+      --tabbar-blur: blur(10px);
+    }
+
+    /* html, body {
+      margin:0; padding:0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "PingFang TC", "Segoe UI", Arial, sans-serif;
+      font-size: 17px;
+      letter-spacing: 0.03em;
+      min-height:100vh;
+    } */ /* 修正註解結尾 */
+    .header {
+      background: linear-gradient(90deg, var(--main) 60%, var(--accent) 100%);
+      color: var(--white);
+      padding: 40px 10px 35px 10px; /* 增加內邊距 */
+      text-align: center;
+      font-size: 3.5rem; /* 放大字體 */
+      font-weight: bold;
+      letter-spacing: 2.5px;
+      box-shadow: 0 6px 16px rgba(55,151,100,0.12);
+      border-bottom-left-radius: 22px;
+      border-bottom-right-radius: 22px;
+      z-index: 20;
+      position: relative;
+      user-select: none;
+      transition: background 0.5s;
+    }
+    .container {
+      padding: 34px 17px 110px 17px;
+      max-width: 700px;
+      margin: auto;
+      min-height: 85vh;
+    }
+    /* 按鈕設計 */
+    .button {
+      display: inline-block;
+      background: linear-gradient(90deg, var(--main) 70%, var(--accent) 100%);
+      color: var(--white);
+      border: none;
+      padding: 15px 0;
+      min-width:130px;
+      border-radius: 30px;
+      font-size: 1.23rem;
+      font-weight: bold;
+      margin: 10px 8px 0 0;
+      box-shadow: 0 2px 10px rgba(85,181,132,0.14);
+      cursor: pointer;
+      outline: none;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      letter-spacing: 0.08em;
+    }
+    .button:disabled { opacity: 0.55; cursor:not-allowed; filter:grayscale(0.3);}
+    .button:hover:enabled, .button:focus:enabled {
+      background: linear-gradient(90deg, var(--main-dark) 55%, var(--accent-dark) 100%);
+      transform: translateY(-2px) scale(1.045);
+      box-shadow: 0 8px 32px rgba(60,160,100,0.19);
+    }
+    .button.secondary {
+      background: var(--white);
+      color: var(--main-dark);
+      border: 2px solid var(--main-dark);
+      box-shadow: 0 1px 6px rgba(60,140,80,0.07);
+    }
+    .button.danger {
+      background: linear-gradient(90deg, #f44336 80%, var(--accent-dark) 120%);
+      color: #fff;
+      border: none;
+    }
+    /* 卡片設計 */
+    .card {
+      background: var(--glass);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 22px 18px 22px;
+      margin-bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      position: relative;
+      backdrop-filter: blur(2.5px);
+      border: 1px solid #e6eae9;
+      transition: box-shadow var(--transition);
+    }
+    .card:hover {
+      box-shadow: 0 12px 40px rgba(85,181,132,0.17), 0 2.5px 7px rgba(0,0,0,0.05);
+    }
+    /* 分享卡片 */
+    .share-feed-card {
+      border-left: 7px solid var(--main);
+      background: rgba(85,181,132,0.08);
+      margin-bottom: 26px;
+      transition: box-shadow var(--transition);
+    }
+    .share-feed-card:hover {
+      box-shadow: 0 10px 34px rgba(85,181,132,0.14), 0 2px 9px rgba(0,0,0,0.07);
+    }
+    .share-feed-img {
+      width: 100%; max-height: 190px; object-fit: cover; border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(255,185,94,0.10);
+      margin-bottom: 10px;
+    }
+    .share-feed-user {
+      font-weight: bold;
+      color: var(--main-dark);
+      font-size: 1.12em;
+      letter-spacing: 0.02em;
+      margin-bottom: 2px;
+    }
+    .share-feed-meta {
+      font-size: 0.98em;
+      color: #888;
+      margin-left: 6px;
+      font-weight: 400;
+      letter-spacing:0.01em;
+    }
+    .share-feed-actions {
+      margin-top: 7px;
+      display: flex;
+      gap: 15px;
+      font-size: 1.12em;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .share-feed-actions button, .share-feed-actions a {
+      background: none;
+      border: none;
+      color: var(--main-dark);
+      cursor: pointer;
+      font-size: 1em;
+      padding: 0 5px;
+      border-radius: 8px;
+      outline: none;
+      transition: background 0.11s, color 0.12s;
+    }
+    .share-feed-actions button:hover, .share-feed-actions a:hover {
+      background: var(--main);
+      color: var(--white);
+    }
+    .share-feed-actions .fa { margin-right: 4px; }
+    .share-feed-actions a { text-decoration: underline; }
+    /* 留言區 */
+    .comment-section {
+      margin-top: 13px;
+      border-top: 1px solid #e3eaea;
+      padding-top: 13px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 9px;
+    }
+    .comment-form {
+      display: flex;
+      margin-bottom: 8px;
+      gap: 10px;
+    }
+    .comment-form input[type="text"] {
+      flex-grow: 1;
+      padding: 10px 13px;
+      border: 1.5px solid #cde7db;
+      border-radius: 7px;
+      font-size: 16px;
+      background: #fbfdfc;
+      transition: border 0.13s;
+    }
+    .comment-form input[type="text"]:focus {
+      border: 1.5px solid var(--main);
+    }
+    .comment-form button {
+      padding: 10px 18px;
+      font-size: 15px;
+      border-radius: 9px;
+      background: linear-gradient(90deg, var(--main) 60%, var(--accent) 100%);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .comment-form button:hover { background: var(--main-dark);}
+    .comment-list {
+      list-style: none;
+      padding: 0; margin: 0;
+    }
+    .comment-item {
+      background: #f8faf9;
+      border-radius: 7px;
+      padding: 12px 14px 8px 14px;
+      margin-bottom: 8px;
+      border-left: 3.5px solid var(--accent);
+      box-shadow: 0 1px 5px rgba(255,185,94,0.06);
+    }
+    .comment-user {
+      font-weight: bold;
+      color: var(--accent-dark);
+      font-size: 1em;
+      margin-bottom: 2px;
+    }
+    .comment-content {
+      font-size: 0.99em;
+      color: var(--text);
+      margin-bottom: 1px;
+    }
+    .comment-meta {
+      font-size: 0.85em;
+      color: #aaa;
+      text-align: right;
+      margin-top: 3px;
+      font-style: italic;
+      letter-spacing:0.02em;
+    }
+    /* 表單 */
+    .form-group {
+      margin-bottom: 22px;
+      position: relative;
+    }
+    label {
+      font-size: 1.07em;
+      font-weight: 600;
+      margin-bottom: 7px;
+      color: var(--main-dark);
+      display: block;
+      letter-spacing: 0.04em;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 13px 14px;
+      margin-top: 6px;
+      border: 1.5px solid #e2ebe6;
+      border-radius: 8px;
+      font-size: 1.09em;
+      box-sizing: border-box;
+      background: #f8faf9;
+      transition: border 0.14s, box-shadow 0.13s;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--main);
+      box-shadow: 0 2px 8px rgba(85,181,132,0.12);
+      background: #f2fcf7;
+    }
+    input[type="date"]:focus,
+    input[type="number"]:focus { background: #f8faf6; }
+    input.input-error, select.input-error {
+      border-color: var(--error);
+      background: #fff1f1;
+    }
+    .error-message {
+      padding: 11px 10px;
+      border-radius: 8px;
+      margin-bottom: 19px;
+      background: rgba(244,67,54,0.11);
+      color: var(--error);
+      text-align: center;
+      font-weight: 500;
+      font-size: 1em;
+      border: 1.5px solid #f9d3d0;
+      box-shadow: 0 1px 4px rgba(244,67,54,0.08);
+      display: none;
+    }
+    .success-message {
+      padding: 11px 10px;
+      border-radius: 8px;
+      margin-bottom: 19px;
+      background: rgba(85,181,132,0.09);
+      color: var(--main-dark);
+      text-align: center;
+      font-weight: 500;
+      font-size: 1em;
+      border: 1.5px solid #c1eedc;
+      box-shadow: 0 1px 4px rgba(85,181,132,0.09);
+      display: none;
+    }
+    /* Tabs設計 */
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      border-bottom: 2.5px solid #e0eae5;
+      margin-bottom: 20px;
+      gap: 7px;
+      background: #fcfdfc;
+      border-radius: 18px 18px 0 0;
+      box-shadow: 0 1px 5px rgba(85,181,132,0.04);
+      overflow-x:auto;
+    }
+    .tabs button {
+      flex: 1;
+      padding: 13px 0;
+      font-size: 1.06em;
+      font-weight: bold;
+      background: transparent;
+      color: var(--main-dark);
+      border: none;
+      border-radius: 14px 14px 0 0;
+      cursor: pointer;
+      outline: none;
+      transition: background 0.17s, color 0.17s;
+      margin:0 3px;
+      letter-spacing: 0.05em;
+    }
+    .tabs button.active {
+      background: linear-gradient(90deg, var(--main) 70%, var(--accent) 100%);
+      color: var(--white);
+      box-shadow: 0 1.5px 8px rgba(85,181,132,0.08);
+    }
+    .tab-content { display: none; padding: 14px 0 2px 0;}
+    .tab-content.active { display: block;}
+
+    /* Recipe card美化 */
+    .recipe-card {
+      background: var(--white);
+      border-radius: 15px;
+      margin: 17px 0;
+      padding: 28px 22px 18px 22px;
+      box-shadow: 0 5px 25px rgba(255,185,94,0.13), 0 2px 8px rgba(0,0,0,0.03);
+      animation: fadeIn 0.6s;
+      border: 1.5px solid #f7e5c7;
+      transition: box-shadow var(--transition);
+    }
+    .recipe-card:hover {
+      box-shadow: 0 14px 48px rgba(255,185,94,0.18), 0 3px 11px rgba(0,0,0,0.06);
+    }
+    .recipe-card h3 {
+      margin: 0 0 13px;
+      font-size: 1.23rem;
+      color: #2b5b3d;
+      font-weight: bold;
+      letter-spacing: 0.03em;
+    }
+    .step-title { font-weight: bold; color: var(--accent-dark); margin-bottom: 4px; font-size: 1.07em;}
+    .recipe-nutrition, .recipe-ingredients { font-size: 1.04em; color: var(--text); margin: 8px 0; }
+    .recipe-tags { font-size: 1em; color: #888; margin: 6px 0 0 0; }
+    .recipe-section-title {
+      font-size: 1.27em;
+      color:var(--main-dark);
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      margin: 13px 0 5px 0;
+      display: none;
+    }
+    /* 其他卡片列表 */
+    .list-item {
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 2px 9px rgba(85,181,132,0.07);
+      padding: 14px 15px;
+      margin-bottom: 15px;
+      font-size: 1.03em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .list-item .title { font-size: 1.09em; font-weight: bold; margin-bottom: 2px;}
+    .list-item .details { font-size: 0.99em; color: #666;}
+    /* 提醒卡 */
+    .reminder-card {
+      background: linear-gradient(90deg,#e6f7ef 75%,#fff3e2 100%);
+      border-radius: 13px;
+      box-shadow: 0 2px 11px rgba(255,185,94,0.10), 0 1px 4px rgba(85,181,132,0.06);
+      padding: 13px 16px;
+      margin-bottom: 11px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .reminder-card .details { font-size: 1.08em; font-weight: bold; color: #2b5b3d;}
+    .reminder-card .expiry { font-size: .99em; color: #f44336;}
+    .reminder-card button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: background 0.15s;
+      font-weight: 600;
+      box-shadow: 0 1px 6px rgba(255,185,94,0.11);
+    }
+    .reminder-card button:hover { background: var(--accent-dark); }
+    /* Profile */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 24px;
+      padding: 7px 0;
+    }
+    .profile-header img {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 3.5px solid var(--main);
+      object-fit: cover;
+      box-shadow: 0 2px 9px rgba(85,181,132,0.16);
+      background:#fff;
+    }
+    .profile-header .info .name {
+      font-size: 1.27em;
+      font-weight: bold;
+      color: var(--main-dark);
+      letter-spacing: 0.04em;
+    }
+    .profile-header .info .email {
+      font-size: 1.03em;
+      color: #888;
+      margin-top: 3px;
+    }
+    .avatar-edit-btn {
+      display: inline-block;
+      position: absolute;
+      right: -2px;
+      bottom: 0px;
+      background: var(--accent-dark);
+      color: #fff;
+      border-radius: 50%;
+      border: none;
+      width: 33px;
+      height: 33px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.29em;
+      box-shadow: 0 2px 8px rgba(255,185,94,0.21);
+      transition: background .18s;
+      z-index: 2;
+      border:2px solid #fff;
+    }
+    .avatar-edit-btn:hover { background: var(--main-dark);}
+    .avatar-upload-input { display: none;}
+    .profile-avatar-wrapper {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .settings button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 7px;
+      font-size: 1.13em;
+      cursor: pointer;
+      margin-bottom: 12px;
+      display: block;
+      width: 100%;
+      text-align: left;
+      font-weight: 600;
+      box-shadow: 0 1px 7px rgba(255,185,94,0.11);
+      transition: background 0.15s;
+    }
+    .settings button:hover { background: var(--accent-dark);}
+    /* Spinner */
+    .spinner {
+      width: 22px; height: 22px;
+      border: 4px solid rgba(255,185,94,0.23);
+      border-radius: 50%;
+      border-top-color: var(--accent-dark);
+      animation: spin 1s infinite linear;
+      display: inline-block;
+      margin-right: 7px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg);} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(30px);} to{opacity:1;transform:translateY(0);} }
+    /* 固定在右下角的分享按鈕 */
+    .fixed-share-button {
+      position: fixed;
+      bottom: 90px; /* 調整位置，避免與 Tabbar 重疊 */
+      right: 20px;
+      z-index: 25; /* 確保在 Tabbar 上方 */
+      /* 繼承 .button 的樣式 */
+    }
+
+    /* Tabbar設計 */
+    .tabbar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--tabbar-glass);
+      box-shadow: 0 -4px 22px rgba(85,181,132,0.12), 0 -1.5px 6px rgba(0,0,0,0.06);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 30;
+      height: 72px;
+      border-top: 2.5px solid #e0eae5;
+      backdrop-filter: var(--tabbar-blur);
+      padding:0 4px;
+      border-radius: 25px 25px 0 0;
+      transition: background 0.5s;
+    }
+    .tabbar-btn {
+      flex: 1;
+      text-align: center;
+      color: #aaa;
+      font-size: 1.13rem;
+      padding: 10px 0 4px 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+      outline: none;
+      position: relative;
+      font-weight: 500;
+      border-radius: 16px 16px 0 0;
+      transition: color .13s, background .14s, font-size .11s;
+      margin:0 5px;
+    }
+    .tabbar-btn span {
+      display: block;
+      font-size: 1.65em;
+      margin-bottom: 2px;
+      transition: color .13s;
+    }
+    .tabbar-btn.active, .tabbar-btn:focus {
+      color: var(--white); /* 確保選中時是白色 */
+      background: linear-gradient(90deg,var(--main) 75%,var(--accent) 100%);
+      font-weight: 700;
+      font-size: 1.18rem;
+      box-shadow: 0 2px 10px rgba(85,181,132,0.09);
+    }
+    .tabbar-btn.active span, .tabbar-btn:focus span {
+      color: var(--white);
+    }
+    /* Modal(彈窗)美化 */
+    #modal-share, #modal-msg, #modal-full-recipe {
+      display:none;
+      position:fixed;
+      top:0; left:0; right:0; bottom:0;
+      background:rgba(40,60,45,0.18);
+      z-index:100;
+      align-items:center; justify-content:center;
+      backdrop-filter: blur(8px);
+      transition: background 0.4s;
+    }
+    #modal-share .card, #modal-msg .card {
+      max-width: 410px;
+      border-radius: 22px;
+      box-shadow: 0 8px 36px rgba(85,181,132,0.18), 0 3px 12px rgba(0,0,0,0.09);
+      background: var(--white);
+      border: 2px solid #b9f2d9;
+      margin:auto;
+      padding: 28px 26px 18px 26px;
+      animation: fadeIn 0.4s;
+    }
+    #modal-full-recipe .card {
+      max-width: 650px;
+      border-radius: 27px;
+      margin: 32px auto;
+      background: var(--white);
+      animation: fadeIn 0.4s;
+      border: 2px solid #ffe3bb;
+      box-shadow: 0 16px 72px rgba(255,185,94,0.22), 0 4px 16px rgba(0,0,0,0.09);
+      padding: 35px 30px 21px 30px;
+    }
+    /* 手動食材下拉選單 */
+    .manual-ingredients-input {
+      margin-top: 7px;
+      padding: 11px 13px;
+      border: 1.5px solid #cde7db;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    .manual-ingredients-input:focus {
+      border: 1.5px solid var(--main);
+      background: #f6fff8;
+    }
+
+    /* 響應式設計(手機/平板) */
+    @media (max-width: 800px) {
+      .container { max-width: 98vw;}
+      .header { font-size: 1.5rem; padding: 16px 0 13px 0;}
+      .tabbar { height: 65px;}
+    }
+    @media (max-width: 500px) {
+      .container { padding: 7px 1vw 80px 1vw;}
+      .header { font-size: 1.13rem; padding: 10px 0 8px 0;}
+      .card, .recipe-card, #modal-share .card, #modal-msg .card, #modal-full-recipe .card {
+        padding: 16px 5vw 14px 5vw;
+        border-radius: 14px;
+      }
+      .profile-header img, .profile-avatar-wrapper { width: 54px; height: 54px;}
+      .avatar-edit-btn { width: 26px; height: 26px; right:-2px; font-size:1em;}
+      .reminder-card, .list-item { padding: 9px 8px;}
+      .tabs button { font-size: 15px; padding: 8px 0;}
+      .tabbar-btn span { font-size: 1.3rem;}
+      .tabbar { height: 56px;}
+    }
+    /* 隱藏頁面預設 */
+    .page { display: none;}
+    .page.active { display: block;}
+  </style>
+  <!-- Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Apple Sign-In SDK -->
+  <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+</head>
+<body>
+  <div class="header" id="appHeader">SmartPantry 食物管家</div>
+  <div class="container">
+    <div class="page" id="page-login">
+      <div id="login-success-message" class="success-message"></div>
+      <div id="login-error-message" class="error-message"></div>
+      <form class="card" id="loginForm" style="display:block;">
+        <div style="text-align:center; margin-bottom:10px;">
+          <img src="https://img.icons8.com/ios-filled/80/6a994e/chef-hat.png" alt="logo" style="width:48px;"/><br>
+          <span style="font-size:1.2em;color:var(--main);font-weight:bold;">SmartPantry</span>
+        </div>
+        <div class="form-group">
+          <label for="loginEmail">電子郵件 <span aria-hidden="true" style="color:#d90429;">*</span></label>
+          <input type="email" id="loginEmail" name="loginEmail" placeholder="請輸入您的電子郵件" required>
+          <div class="error-text" id="loginEmailError"></div>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">密碼 <span aria-hidden="true" style="color:#d90429;">*</span></label>
+          <input type="password" id="loginPassword" name="loginPassword" placeholder="請輸入您的密碼" required>
+          <div class="error-text" id="loginPasswordError"></div>
+        </div>
+        <button class="button" id="loginButton" type="submit">登入</button>
+        <div style="text-align:right; margin-top:8px;">
+          <a href="#" id="forgetPassword" style="color:var(--main);font-size:0.99em;">忘記密碼？</a>
+        </div>
+        <div class="toggle-form">
+          還沒有帳號？<a href="#" id="showRegister" style="color:var(--main);font-weight:bold;">立即註冊</a>
+        </div>
+        <div style="margin-top:13px; text-align:center;">
+          <button class="button" style="background:#fff;color:#333;border:1px solid #ccc;" type="button" id="loginGoogle"><i class="fab fa-google"></i> Google</button>
+          <button class="button" style="background:#fff;color:#333;border:1px solid #ccc;" type="button" id="loginApple"><i class="fab fa-apple"></i> Apple</button>
+        </div>
+      </form>
+      <form class="card" id="registerForm" style="display:none;">
+        <div style="text-align:center; margin-bottom:10px;">
+          <img src="https://img.icons8.com/ios-filled/80/6a994e/chef-hat.png" alt="logo" style="width:48px;"/><br>
+          <span style="font-size:1.2em;color:var(--main);font-weight:bold;">SmartPantry</span>
+        </div>
+        <div class="form-group">
+          <label for="registerName">姓名 <span aria-hidden="true" style="color:#d90429;">*</span></label>
+          <input type="text" id="registerName" name="registerName" placeholder="請輸入您的姓名" required>
+          <div class="error-text" id="registerNameError"></div>
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">電子郵件 <span aria-hidden="true" style="color:#d90429;">*</span></label>
+          <input type="email" id="registerEmail" name="registerEmail" placeholder="請輸入您的電子郵件" required>
+          <div class="error-text" id="registerEmailError"></div>
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">密碼 <span aria-hidden="true" style="color:#d90429;">*</span></label>
+          <input type="password" id="registerPassword" name="registerPassword" placeholder="請輸入密碼（至少6個字符）" required>
+          <div class="error-text" id="registerPasswordError"></div>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">確認密碼 <span aria-hidden="true" style="color:#d90429;">*</span></label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="請再次輸入密碼" required>
+          <div class="error-text" id="confirmPasswordError"></div>
+        </div>
+        <button class="button" id="registerButton" type="submit">註冊</button>
+        <div class="toggle-form">
+          已有帳號？<a href="#" id="showLogin" style="color:var(--main);font-weight:bold;">立即登入</a>
+        </div>
+      </form>
+    </div>
+    <div class="page" id="page-feed">
+      <button class="button fixed-share-button" id="btn-new-share"><i class="fa fa-plus"></i> 發佈食物分享</button>
+      <div id="feed-list"></div>
+    </div>
+    <div class="page" id="page-recipe">
+      <form class="card" id="recipeForm" autocomplete="off" novalidate>
+        <div class="form-group">
+          <label for="age">年齡 <span aria-hidden="true" style="color:#d90429;">*</span></label>
+          <input type="number" id="age" name="age" placeholder="請輸入您的年齡" min="1" max="120" required>
+          <div class="error-text" id="ageError"></div>
+        </div>
+        <div class="form-group">
+          <label for="allergens">過敏原</label>
+          <input type="text" id="allergens" name="allergens" placeholder="請輸入過敏原（例如：堅果、乳製品）" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="goal">飲食目標</label>
+          <select id="goal" name="goal">
+            <option value="lose-weight">減脂</option>
+            <option value="gain-muscle">增肌</option>
+            <option value="maintain">保持健康</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="mealType">你希望製作哪種類型的餐點？</label>
+          <select id="mealType" name="mealType">
+            <option value="breakfast">早餐</option>
+            <option value="lunch">午餐</option>
+            <option value="dinner">晚餐</option>
+            <option value="dessert">甜點</option>
+            <option value="afternoon-tea">下午茶</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cuisineType">你想做什麼類型的菜式？</label>
+          <select id="cuisineType" name="cuisineType">
+            <option value="Chinese">中式</option>
+            <option value="Western">西式</option>
+            <option value="Vegetarian">素食</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="prepTime">你希望這個食譜的準備時間大約是多久？</label>
+          <select id="prepTime" name="prepTime">
+            <option value="30">30分鐘</option>
+            <option value="60">1小時</option>
+            <option value="120">2小時</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ingredients">你打算用什麼食材？</label>
+          <input type="text" id="ingredients" name="ingredients" placeholder="例如：雞肉、番茄" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="servings">你有幾個人需要這道菜？</label>
+          <select id="servings" name="servings">
+            <option value="1">1人</option>
+            <option value="2">2人</option>
+            <option value="4">4人</option>
+            <option value="6">6人以上</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="flavorPreference">口味偏好</label>
+          <select id="flavorPreference" name="flavorPreference">
+            <option value="">請選擇</option>
+            <option value="spicy">偏辣</option>
+            <option value="sweet">偏甜</option>
+            <option value="light">清淡</option>
+            <option value="bold">重口味</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="kitchenEquipment">可用的廚房設備</label>
+          <input type="text" id="kitchenEquipment" name="kitchenEquipment" placeholder="例如：烤箱、微波爐、氣炸鍋">
+        </div>
+        <button class="button" id="generate" type="submit">生成食譜</button>
+      </form>
+      <div id="loading-message" class="success-message" style="display:none;">
+        <div class="spinner"></div>
+        <span id="loading-text">生成中，請稍候...</span>
+      </div>
+      <div id="model-message" class="success-message" style="display:none;" aria-live="polite"></div>
+      <div id="error-message" class="error-message" style="display:none;" aria-live="assertive"></div>
+      <div class="recipe-section-title" id="recipe-section-title" style="display:none; font-size:1.2em; color:var(--main);font-weight:bold;">推薦食譜</div>
+      <div id="recipe-container"></div>
+    </div>
+    <div class="page" id="page-pantry">
+      <div class="card">
+        <div class="scanner">
+        <button type="button" id="btn-scan-barcode" class="button"><i class="fa fa-barcode"></i> 掃描條碼</button>
+          <button type="button" id="btn-scan-photo" class="button"><i class="fa fa-camera"></i> 拍攝包裝</button>
+          <input type="file" id="photo-upload-input" accept="image/*" capture="environment" style="display: none;">
+        </div>
+        <div id="pantry-loading-message" class="success-message" style="display:none;">
+          <div class="spinner"></div>
+          <span id="pantry-loading-text">正在識別圖片，請稍候...</span>
+        </div>
+        <div id="pantry-error-message" class="error-message" style="display:none;" aria-live="assertive"></div>
+        <div class="form-group">
+          <label for="food-name">食物名稱</label>
+          <input type="text" id="food-name" placeholder="例如：牛奶、雞蛋">
+        </div>
+        <div class="form-group">
+          <label for="expiry-date">到期日</label>
+          <input type="date" id="expiry-date">
+        </div>
+        <div class="form-group">
+          <label for="quantity">數量</label>
+          <input type="number" id="quantity" placeholder="例如：1, 2">
+        </div>
+        <button class="button" id="btn-add-food">新增食物</button>
+      </div>
+      <div class="card" id="expiring-list">
+        <div style="font-weight:bold;color:var(--main);margin-bottom:10px;">即將到期</div>
+        <div id="expiring-foods"></div>
+      </div>
+      <!-- 新增：已過期食物列表 -->
+      <div class="card" id="expired-list">
+        <div style="font-weight:bold;color:var(--error);margin-bottom:10px; display: flex; justify-content: space-between; align-items: center;">
+          <span>已過期食物</span>
+          <button class="button" id="btn-clear-expired" style="background:#d90429; color:#fff; padding: 5px 10px; font-size: 0.9em; margin-left: 10px; margin-top: 0;">
+            <i class="fa fa-trash-alt"></i> 剷除已過期
+          </button>
+        </div>
+        <div id="expired-foods"></div>
+      </div>
+      <!-- 新增：所有食物列表 -->
+      <div class="card" id="all-pantry-list">
+        <div style="font-weight:bold;color:var(--main);margin-bottom:10px;">所有食物</div>
+        <div id="all-foods"></div>
+      </div>
+    </div>
+    <div class="page" id="page-profile">
+      <div class="profile-header">
+        <div class="profile-avatar-wrapper">
+          <img src="https://via.placeholder.com/80x80" id="profile-avatar" alt="Profile Picture">
+          <button class="avatar-edit-btn" id="btn-edit-avatar" title="更換頭像"><i class="fa fa-pen"></i></button>
+          <input type="file" id="avatar-upload-input" class="avatar-upload-input" accept="image/*">
+        </div>
+        <div class="info">
+          <div class="name" id="profile-name"></div>
+          <div class="email" id="profile-email"></div>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab-button active" onclick="showProfileTab('recipes', event)">我的食譜</button>
+        <button class="tab-button" onclick="showProfileTab('shared', event)">分享紀錄</button>
+        <button class="tab-button" onclick="showProfileTab('coupons', event)">兌換券</button>
+      </div>
+      <div id="recipes" class="tab-content active"></div>
+      <div id="shared" class="tab-content"></div>
+      <div id="coupons" class="tab-content"></div>
+      <div class="card">
+        <div style="font-size:1.07em;font-weight:bold;color:var(--main);margin-bottom:8px;">設定</div>
+        <div class="settings">
+          <button id="btn-update-profile"><i class="fa fa-user-edit"></i> 更新健康資料</button>
+          <button id="btn-toggle-notification"><i class="fa fa-bell"></i> 通知開關: <span id="notification-status"></span></button>
+          <button id="btn-logout"><i class="fa fa-sign-out-alt"></i> 登出</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar" id="tabbar" style="display:none;">
+    <button class="tabbar-btn active" data-page="page-feed"><span class="fa fa-store"></span>市集</button>
+    <button class="tabbar-btn" data-page="page-pantry"><span class="fa fa-box-open"></span>食物管理</button>
+    <button class="tabbar-btn" data-page="page-recipe"><span class="fa fa-utensils"></span>智慧食譜</button>
+    <button class="tabbar-btn" data-page="page-profile"><span class="fa fa-user"></span>個人檔案</button>
+  </div>
+  <div id="modal-share" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.21);z-index:100;align-items:center;justify-content:center;">
+    <div class="card" style="max-width:380px;margin:auto;">
+      <div style="font-weight:bold;color:var(--main);margin-bottom:6px;">發佈食物分享</div>
+      <div class="form-group">
+        <label for="share-img">食物圖片（可選）</label>
+        <div style="display:flex; gap: 8px;">
+          <input type="file" accept="image/*" capture="environment" id="share-img" style="flex-grow: 1;">
+          <button type="button" id="btn-share-camera" class="button" style="background: var(--accent); padding: 10px 15px; font-size: 1em; margin-top: 0;"><i class="fa fa-camera"></i> 拍照</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="share-desc">描述</label>
+        <textarea id="share-desc" rows="2" placeholder="如：多出2顆蘋果，有人需要嗎？" style="width:100%;border:1px solid #ddd;border-radius:5px;padding:7px;"></textarea>
+      </div>
+      <button class="button" id="btn-share-submit">發佈</button>
+      <button class="button" id="btn-share-cancel" style="background:#ccc;color:#333;margin-top:5px;">取消</button>
+    </div>
+  </div>
+  <div id="modal-msg" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.21);z-index:110;align-items:center;justify-content:center;">
+    <div class="card" style="max-width:360px;margin:auto;">
+      <div style="font-weight:bold;margin-bottom:8px;">聯絡分享者</div>
+      <div id="msg-to-user" style="font-size:1.05em;color:var(--main);margin-bottom:7px;"></div>
+      <textarea id="msg-content" rows="3" placeholder="輸入您的訊息..." style="width:100%;border:1px solid #ddd;border-radius:5px;padding:7px;"></textarea>
+      <button class="button" id="btn-msg-send">送出</button>
+      <button class="button" id="btn-msg-cancel" style="background:#ccc;color:#333;margin-top:5px;">取消</button>
+    </div>
+  </div>
+
+  <!-- 新增：完整食譜顯示模態框 -->
+  <div id="modal-full-recipe" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.21);z-index:120;align-items:center;justify-content:center;overflow-y:auto;">
+    <div class="card" style="max-width:600px;margin:20px auto;width:90%;">
+      <div style="font-weight:bold;color:var(--main);margin-bottom:10px;font-size:1.3em;" id="full-recipe-title"></div>
+      <div id="full-recipe-content">
+        <!-- Full recipe details will be loaded here -->
+      </div>
+      <button class="button" id="btn-close-full-recipe" style="background:#ccc;color:#333;margin-top:15px;">關閉</button>
+    </div>
+  </div>
+
+  <script>
+    // ===================== 基本用戶&SPA管理 ===================== //
+    const USER_STORAGE_KEY = 'SP_users';
+    const CURRENT_USER_KEY = 'SP_current_user';
+    const PANTRY_KEY_PREFIX = 'SP_pantry_';
+    const SHARED_KEY_PREFIX = 'SP_shared_';
+    const RECIPE_KEY_PREFIX = 'SP_recipe_';
+    const COUPON_KEY_PREFIX = 'SP_coupon_';
+    const AVATAR_KEY_PREFIX = 'SP_avatar_'; // 新增：用戶頭像本地儲存key
+    const INGREDIENTS_KEY_PREFIX = 'SP_ingredients_'; // 新增：用戶食材列表本地儲存key
+    const NOTIFICATION_KEY_PREFIX = 'SP_notification_'; // 新增：通知開關本地儲存key
+
+    // 注意事項：請確保將 API_KEY 和 API_URL 替換為您自己的值。
+    const API_KEY = "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";
+    const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+    const modelList = [
+      { name: "Gemini 2.0 Flash", id: "google/gemini-2.0-flash-001" },
+      { name: "DeepSeek V3", id: "deepseek/deepseek-chat-v3-0324" },
+      { name: "GPT-4o-mini", id: "openai/gpt-4o-mini" }
+    ];
+
+    // 渲染頁面
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      window.scrollTo(0, 0);
+      let title = {
+        "page-feed": "SmartPantry 食物分享市集",
+        "page-pantry": "SmartPantry 食物管理",
+        "page-recipe": "SmartPantry 智慧食譜生成",
+        "page-profile": "SmartPantry 個人檔案",
+        "page-login": "SmartPantry 食物管家"
+      }[pageId] || "SmartPantry";
+      document.getElementById('appHeader').innerText = title;
+      document.getElementById('tabbar').style.display = (pageId === "page-login") ? "none" : "flex";
+      document.querySelectorAll('.tabbar-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.page === pageId));
+      if (pageId === "page-profile") renderProfile();
+      if (pageId === "page-pantry") renderPantry();
+      if (pageId === "page-feed") renderFeed();
+      if (pageId === "page-recipe") {
+        renderIngredientsSelect(); // 新增：切換到食譜頁面時渲染食材下拉選單
+        fillRecipeFormWithProfileData(); // 新增：自動填寫用戶資料到食譜表單
+      }
+    }
+    document.querySelectorAll('.tabbar-btn').forEach(btn => btn.addEventListener('click', e => showPage(btn.dataset.page)));
+    document.getElementById('btn-logout').onclick = function() {
+      localStorage.removeItem(CURRENT_USER_KEY);
+      showPage("page-login");
+    };
+
+    // 控制固定分享按鈕的顯示
+    function toggleFixedShareButton() {
+        const fixedButton = document.getElementById('btn-new-share');
+        const currentPage = document.querySelector('.page.active');
+        // 只在市集頁面 (page-feed) 顯示按鈕
+        if (currentPage && currentPage.id === 'page-feed') {
+            fixedButton.style.display = 'inline-block'; // 或 'block' 取決於按鈕的原始 display 屬性
+        } else {
+            fixedButton.style.display = 'none';
+        }
+    }
+
+    // 監聽滾動事件，但目前需求是鎖定，所以不需要滾動監聽
+    // window.addEventListener('scroll', function() {
+    //     // 如果需要滾動時隱藏或顯示，可以在這裡添加邏輯
+    // });
+
+    // 修改 showPage 函式以控制按鈕顯示
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      window.scrollTo(0, 0);
+      let title = {
+        "page-feed": "SmartPantry 食物分享市集",
+        "page-pantry": "SmartPantry 食物管理",
+        "page-recipe": "SmartPantry 智慧食譜生成",
+        "page-profile": "SmartPantry 個人檔案",
+        "page-login": "SmartPantry 食物管家"
+      }[pageId] || "SmartPantry";
+      document.getElementById('appHeader').innerText = title;
+      document.getElementById('tabbar').style.display = (pageId === "page-login") ? "none" : "flex";
+      document.querySelectorAll('.tabbar-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.page === pageId));
+
+      toggleFixedShareButton(); // 切換頁面時控制按鈕顯示
+
+      if (pageId === "page-profile") renderProfile();
+      if (pageId === "page-pantry") renderPantry();
+      if (pageId === "page-feed") renderFeed();
+      if (pageId === "page-recipe") {
+        renderIngredientsSelect(); // 新增：切換到食譜頁面時渲染食材下拉選單
+        fillRecipeFormWithProfileData(); // 新增：自動填寫用戶資料到食譜表單
+      }
+    }
+
+    // 新增：自動填寫用戶資料到食譜表單
+    function fillRecipeFormWithProfileData() {
+        const user = getCurrentUser();
+        if (user) {
+            const ageInput = document.getElementById('age');
+            const allergensInput = document.getElementById('allergens');
+            if (ageInput && user.age !== undefined) {
+                ageInput.value = user.age;
+            }
+            if (allergensInput && user.allergens !== undefined) {
+                allergensInput.value = user.allergens;
+            }
+        }
+    }
+
+    // 用戶管理
+    function getUsers() {
+      const usersJson = localStorage.getItem(USER_STORAGE_KEY);
+      return usersJson ? JSON.parse(usersJson) : [];
+    }
+    function saveUsers(users) {
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(users));
+    }
+    function setCurrentUser(user) {
+      // 儲存更多用戶資料，包括 age 和 allergens
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify({id: user.id, name: user.name, email: user.email, age: user.age, allergens: user.allergens}));
+    }
+    function getCurrentUser() {
+      const userJson = localStorage.getItem(CURRENT_USER_KEY);
+      return userJson ? JSON.parse(userJson) : null;
+    }
+    function getCurrentUserId() {
+      return getCurrentUser()?.id || null;
+    }
+
+    // 登入註冊流程
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      clearLoginFormErrors();
+      let email = document.getElementById('loginEmail').value.trim();
+      let password = document.getElementById('loginPassword').value;
+      let valid = true;
+      if (!email) {
+        document.getElementById('loginEmailError').textContent = "請輸入電子郵件";
+        document.getElementById('loginEmail').classList.add('input-error');
+        valid = false;
+      }
+      if (!password) {
+        document.getElementById('loginPasswordError').textContent = "請輸入密碼";
+        document.getElementById('loginPassword').classList.add('input-error');
+        valid = false;
+      }
+      if (!valid) return;
+      let users = getUsers();
+      let user = users.find(u => u.email === email && u.password === password);
+      if (!user) {
+        document.getElementById('login-error-message').style.display = "block";
+        document.getElementById('login-error-message').textContent = "電子郵件或密碼錯誤";
+        return;
+      }
+      setCurrentUser(user);
+      document.getElementById('login-success-message').style.display = "block";
+      document.getElementById('login-success-message').textContent = "登入成功！";
+      setTimeout(() => showPage("page-feed"), 1000);
+    });
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      clearRegisterFormErrors();
+      let name = document.getElementById('registerName').value.trim();
+      let email = document.getElementById('registerEmail').value.trim();
+      let password = document.getElementById('registerPassword').value;
+      let confirmPassword = document.getElementById('confirmPassword').value;
+      let valid = true;
+      if (!name) {
+        document.getElementById('registerNameError').textContent = "請輸入您的姓名";
+        document.getElementById('registerName').classList.add('input-error');
+        valid = false;
+      }
+      if (!email) {
+        document.getElementById('registerEmailError').textContent = "請輸入電子郵件";
+        document.getElementById('registerEmail').classList.add('input-error');
+        valid = false;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('registerEmailError').textContent = "請輸入有效電子郵件";
+        document.getElementById('registerEmail').classList.add('input-error');
+        valid = false;
+      }
+      if (!password) {
+        document.getElementById('registerPasswordError').textContent = "請輸入密碼";
+        document.getElementById('registerPassword').classList.add('input-error');
+        valid = false;
+      } else if (password.length < 6) {
+        document.getElementById('registerPasswordError').textContent = "密碼至少6個字元";
+        document.getElementById('registerPassword').classList.add('input-error');
+        valid = false;
+      }
+      if (!confirmPassword) {
+        document.getElementById('confirmPasswordError').textContent = "請確認密碼";
+        document.getElementById('confirmPassword').classList.add('input-error');
+        valid = false;
+      } else if (password !== confirmPassword) {
+        document.getElementById('confirmPasswordError').textContent = "兩次密碼不一致";
+        document.getElementById('confirmPassword').classList.add('input-error');
+        valid = false;
+      }
+      if (!valid) return;
+      let users = getUsers();
+      if (users.some(u => u.email === email)) {
+        document.getElementById('registerEmailError').textContent = "電子郵件已被註冊";
+        document.getElementById('registerEmail').classList.add('input-error');
+        return;
+      }
+      let newUser = {id: Date.now().toString(), name, email, password};
+      users.push(newUser);
+      saveUsers(users);
+      setCurrentUser(newUser);
+      document.getElementById('login-success-message').style.display = "block";
+      document.getElementById('login-success-message').textContent = "註冊成功！";
+      setTimeout(() => showPage("page-feed"), 1000);
+    });
+    function clearLoginFormErrors() {
+      document.querySelectorAll('#loginForm .error-text').forEach(el => el.textContent = '');
+      document.querySelectorAll('#loginForm input').forEach(el => el.classList.remove('input-error'));
+    }
+    function clearRegisterFormErrors() {
+      document.querySelectorAll('#registerForm .error-text').forEach(el => el.textContent = '');
+      document.querySelectorAll('#registerForm input').forEach(el => el.classList.remove('input-error'));
+    }
+    document.getElementById('showRegister').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('loginForm').style.display = "none";
+      document.getElementById('registerForm').style.display = "block";
+      document.getElementById('login-error-message').style.display = "none";
+    };
+    document.getElementById('showLogin').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('loginForm').style.display = "block";
+      document.getElementById('registerForm').style.display = "none";
+      document.getElementById('login-error-message').style.display = "none";
+    };
+    document.getElementById('forgetPassword').onclick = function(e) {
+      e.preventDefault();
+      alert("此功能僅為展示，請聯絡客服或請以其他帳號註冊。");
+    };
+
+    // Google 登入處理
+    document.getElementById('loginGoogle').onclick = function() {
+      // 實際應用中，這裡會呼叫 Google Sign-In API
+      console.log("Google button clicked");
+      // 例如：google.accounts.id.prompt(); 或 google.accounts.oauth2.initCodeClient({...}).requestCode();
+      alert("觸發 Google 登入流程 (僅展示)");
+      // 模擬登入成功
+      // handleGoogleLoginSuccess({ credential: 'mock_google_token', profile: { name: 'Google User', email: 'google@example.com' } });
+    };
+
+    // Apple 登入處理
+    document.getElementById('loginApple').onclick = function() {
+      // 實際應用中，這裡會呼叫 Apple Sign-In API
+      console.log("Apple button clicked");
+      // 例如：AppleID.auth.signIn();
+      alert("觸發 Apple 登入流程 (僅展示)");
+      // 模擬登入成功
+      // handleAppleLoginSuccess({ authorization: { id_token: 'mock_apple_token' }, user: { name: 'Apple User', email: 'apple@example.com' } });
+    };
+
+    // 處理 Google 登入成功回調 (需要根據實際 Google Sign-In 流程實現)
+    function handleGoogleLoginSuccess(response) {
+        console.log('Google 登入成功:', response);
+        // 這裡應該將 response.credential (ID token) 發送到後端進行驗證
+        // 驗證成功後，根據後端返回的用戶資訊進行登入
+        const mockUser = {
+            id: 'google_' + Date.now(), // 模擬生成唯一ID
+            name: response.profile?.name || 'Google 用戶',
+            email: response.profile?.email || 'google_user@example.com',
+            // 其他從後端獲取的用戶資料
+        };
+        // 模擬儲存用戶並登入
+        let users = getUsers();
+        // 檢查是否已存在該 Google 用戶，如果不存在則新增
+        if (!users.find(u => u.email === mockUser.email)) {
+            users.push(mockUser);
+            saveUsers(users);
+        }
+        setCurrentUser(mockUser);
+        document.getElementById('login-success-message').style.display = "block";
+        document.getElementById('login-success-message').textContent = "Google 登入成功！";
+        setTimeout(() => showPage("page-feed"), 1000);
+    }
+
+    // 處理 Apple 登入成功回調 (需要根據實際 Apple Sign-In 流程實現)
+    function handleAppleLoginSuccess(response) {
+        console.log('Apple 登入成功:', response);
+        // 這裡應該將 response.authorization.id_token 發送到後端進行驗證
+        // 驗證成功後，根據後端返回的用戶資訊進行登入
+        const mockUser = {
+            id: 'apple_' + Date.now(), // 模擬生成唯一ID
+            name: response.user?.name || 'Apple 用戶', // Apple 可能不提供姓名，需要處理
+            email: response.user?.email || 'apple_user@example.com', // Apple 可能不提供郵箱，需要處理
+            // 其他從後端獲取的用戶資料
+        };
+         // 模擬儲存用戶並登入
+        let users = getUsers();
+        // 檢查是否已存在該 Apple 用戶，如果不存在則新增
+        if (!users.find(u => u.email === mockUser.email)) {
+            users.push(mockUser);
+            saveUsers(users);
+        }
+        setCurrentUser(mockUser);
+        document.getElementById('login-success-message').style.display = "block";
+        document.getElementById('login-success-message').textContent = "Apple 登入成功！";
+        setTimeout(() => showPage("page-feed"), 1000);
+    }
+
+    function checkAuth() {
+      if (getCurrentUser()) {
+        showPage("page-feed");
+        checkExpiredFoodsAndNotify(); // 登入成功後檢查過期食物並發送通知
+      } else {
+        showPage("page-login");
+      }
+    }
+    window.addEventListener('DOMContentLoaded', checkAuth);
+
+    // ===================== 頭像上傳功能 ===================== //
+    // 頭像存取與渲染
+    function getAvatarByUserId(userId) {
+      return localStorage.getItem(AVATAR_KEY_PREFIX + userId);
+    }
+    function setAvatarByUserId(userId, dataUrl) {
+      if (dataUrl) {
+        localStorage.setItem(AVATAR_KEY_PREFIX + userId, dataUrl);
+      } else {
+        localStorage.removeItem(AVATAR_KEY_PREFIX + userId);
+      }
+    }
+    // 綁定頭像按鈕事件
+    function setupAvatarUpload() {
+      const editBtn = document.getElementById('btn-edit-avatar');
+      const input = document.getElementById('avatar-upload-input');
+      if (!editBtn || !input) return;
+      // 點擊icon開啟檔案選擇
+      editBtn.onclick = function(e) {
+        e.preventDefault();
+        input.value = null; // 重置
+        input.click();
+      };
+      // 上傳後顯示頭像
+      input.onchange = function() {
+        const file = input.files && input.files[0];
+        if (file && /^image\//.test(file.type)) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const dataUrl = e.target.result;
+            // 限制圖片過大自動壓縮
+            resizeImageIfNeeded(dataUrl, 200, function(resizedDataUrl) {
+              // 儲存到localStorage
+              const userId = getCurrentUserId();
+              setAvatarByUserId(userId, resizedDataUrl);
+              // 渲染
+              renderProfile();
+              alert("頭像已更新！");
+            });
+          };
+          reader.readAsDataURL(file);
+        } else {
+          alert("請選擇圖片檔案！");
+        }
+      };
+    }
+    // 若圖片大於maxSize像素則縮放
+    function resizeImageIfNeeded(dataUrl, maxSize, callback) {
+      const img = new window.Image();
+      img.onload = function() {
+        let w = img.width, h = img.height;
+        if (w <= maxSize && h <= maxSize) {
+          callback(dataUrl);
+          return;
+        }
+        if (w > h) {
+          h = Math.round(h * (maxSize / w));
+          w = maxSize;
+        } else {
+          w = Math.round(w * (maxSize / h));
+          h = maxSize;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL('image/png', 0.92));
+      };
+      img.src = dataUrl;
+    }
+
+    // ===================== 食物分享市集/動態 ===================== //
+    function renderFeed() {
+      const feedList = document.getElementById('feed-list');
+      feedList.innerHTML = "";
+      let allFeeds = [];
+      let users = getUsers();
+      users.forEach(u => {
+        let arr = JSON.parse(localStorage.getItem(SHARED_KEY_PREFIX + u.id) || "[]");
+        arr.forEach(feed => allFeeds.push({ ...feed, user: u }));
+      });
+      allFeeds.sort((a, b) => b.time - a.time);
+      if (allFeeds.length === 0) {
+        feedList.innerHTML = '<div style="color:#888;text-align:center;margin-top:30px;">目前還沒有任何分享，快來發佈吧！</div>';
+        return;
+      }
+      for (let feed of allFeeds) {
+        let imgHtml = feed.img ? `<img class="share-feed-img" src="${feed.img}" alt="食物分享圖">` : "";
+        const feedId = `${feed.user.id}-${feed.time}`; // Unique ID for each feed item
+        feedList.innerHTML += `
+          <div class="card share-feed-card" data-feed-id="${feedId}">
+            <div class="share-feed-user">${feed.user.name} <span class="share-feed-meta">${timeAgo(feed.time)}</span></div>
+            ${imgHtml}
+            <div style="margin-bottom:6px;">${escapeHtml(feed.desc)}</div>
+            <div class="share-feed-actions">
+              <button onclick="likeFeed('${feed.user.id}','${feed.time}')"><i class="fa fa-thumbs-up"></i> 讚<span id="like-${feedId}">${feed.likes||0}</span></button>
+            <button onclick="toggleCommentSection('${feedId}')"><i class="fa fa-comment"></i> 留言</button>
+              <button onclick="contactFeed('${feed.user.id}','${feed.user.name}')"><i class="fa fa-message"></i> 聯絡</button>
+            </div>
+            <div class="comment-section" id="comment-section-${feedId}">
+              <div class="comment-form" style="display:none;">
+                <input type="text" id="comment-input-${feedId}" placeholder="輸入您的留言...">
+                <button onclick="submitComment('${feed.user.id}','${feed.time}','${feedId}')">送出</button>
+              </div>
+              <ul class="comment-list" id="comment-list-${feedId}">
+                <!-- Comments will be rendered here -->
+              </ul>
+            </div>
+          </div>
+        `;
+        renderComments(feedId, feed.comments || []); // Render existing comments
+      }
+    }
+    document.getElementById('btn-new-share').onclick = function() {
+      document.getElementById('modal-share').style.display = "flex";
+    };
+    document.getElementById('btn-share-cancel').onclick = function() {
+      document.getElementById('modal-share').style.display = "none";
+      document.getElementById('share-img').value = "";
+      document.getElementById('share-desc').value = "";
+    };
+    document.getElementById('btn-share-submit').onclick = function() {
+      let desc = document.getElementById('share-desc').value.trim();
+      let imgFile = document.getElementById('share-img').files[0];
+      if (!desc) {
+        alert("請填寫描述");
+        return;
+      }
+      let imgUrl = "";
+      let finish = function() {
+        let userId = getCurrentUserId();
+        let arr = JSON.parse(localStorage.getItem(SHARED_KEY_PREFIX + userId) || "[]");
+        arr.unshift({ desc, img: imgUrl, time: Date.now(), likes: 0, comments: [] });
+        localStorage.setItem(SHARED_KEY_PREFIX + userId, JSON.stringify(arr));
+        document.getElementById('modal-share').style.display = "none";
+        document.getElementById('share-img').value = "";
+        document.getElementById('share-desc').value = "";
+        renderFeed();
+        renderProfile();
+      };
+      if (imgFile && window.FileReader) {
+        let reader = new FileReader();
+      reader.onload = e => {
+          imgUrl = e.target.result;
+          finish(); // Move finish() inside onload
+      };
+      reader.onerror = function() {
+           // 讀取失敗也重新啟用按鈕
+           submitBtn.disabled = false;
+           alert("圖片讀取失敗！");
+      };
+      reader.readAsDataURL(imgFile);
+    } else {
+      finish(); // Keep finish() here for no image file case
+    }
+  };
+
+    // 新增：拍照按鈕功能
+    document.getElementById('btn-share-camera').onclick = function() {
+        document.getElementById('share-img').click(); // 觸發檔案選擇，capture="environment" 會開啟相機
+    };
+
+    // 修改 share-img input 的 change 事件處理器
+    document.getElementById('share-img').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const submitBtn = document.getElementById('btn-share-submit');
+        if (file) {
+            submitBtn.disabled = true; // 選擇檔案後禁用發佈按鈕
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // 圖片讀取完成後重新啟用發佈按鈕
+                submitBtn.disabled = false;
+                // 這裡可以選擇是否預覽圖片，目前是直接在 btn-share-submit 的點擊事件中處理圖片數據
+            };
+            reader.onerror = function() {
+                 // 讀取失敗也重新啟用按鈕
+                 submitBtn.disabled = false;
+                 alert("圖片讀取失敗！");
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // 沒有選擇檔案時確保按鈕是啟用的
+            submitBtn.disabled = false;
+        }
+    });
+
+
+    function contactFeed(userId, userName) {
+      document.getElementById('modal-msg').style.display = "flex";
+      document.getElementById('msg-to-user').textContent = userName;
+      document.getElementById('btn-msg-send').onclick = function() {
+        let content = document.getElementById('msg-content').value.trim();
+        if (!content) {
+          alert("請輸入訊息");
+          return;
+        }
+        alert("訊息已送出給 " + userName + "！(僅展示)");
+        document.getElementById('modal-msg').style.display = "none";
+        document.getElementById('msg-content').value = "";
+      };
+      document.getElementById('btn-msg-cancel').onclick = function() {
+        document.getElementById('modal-msg').style.display = "none";
+        document.getElementById('msg-content').value = "";
+      };
+    }
+    // 新增：點讚狀態本地儲存key
+    const LIKED_KEY_PREFIX = 'SP_liked_';
+
+    function likeFeed(userId, time) {
+      const currentUserId = getCurrentUserId();
+      if (!currentUserId) {
+        alert("請先登入才能點讚！");
+        return;
+      }
+
+      const feedId = `${userId}-${time}`;
+      const likedFeeds = JSON.parse(localStorage.getItem(LIKED_KEY_PREFIX + currentUserId) || "[]");
+
+      // 檢查用戶是否已經點讚過這篇貼文
+      if (likedFeeds.includes(feedId)) {
+        alert("您已經點讚過這篇貼文了！");
+        return;
+      }
+
+      // 更新貼文的點讚數
+      let arr = JSON.parse(localStorage.getItem(SHARED_KEY_PREFIX + userId) || "[]");
+      let idx = arr.findIndex(f => f.time == time);
+      if (idx > -1) {
+        arr[idx].likes = (arr[idx].likes || 0) + 1;
+        localStorage.setItem(SHARED_KEY_PREFIX + userId, JSON.stringify(arr));
+        document.getElementById('like-' + feedId).textContent = arr[idx].likes;
+
+        // 記錄用戶已點讚這篇貼文
+        likedFeeds.push(feedId);
+        localStorage.setItem(LIKED_KEY_PREFIX + currentUserId, JSON.stringify(likedFeeds));
+      }
+    }
+    function commentFeed(userId, time) {
+      let comment = prompt("輸入留言內容：");
+      if (!comment) return;
+      let arr = JSON.parse(localStorage.getItem(SHARED_KEY_PREFIX + userId) || "[]");
+      let idx = arr.findIndex(f => f.time == time);
+      if (idx > -1) {
+        arr[idx].comments = arr[idx].comments || [];
+        arr[idx].comments.push({ user: getCurrentUser().name, comment, time: Date.now() });
+        localStorage.setItem(SHARED_KEY_PREFIX + userId, JSON.stringify(arr));
+        alert("留言成功！（僅展示）");
+      }
+    }
+
+    // ===================== 留言功能 ===================== //
+    function toggleCommentSection(feedId) {
+      const commentForm = document.querySelector(`#comment-section-${feedId} .comment-form`);
+      if (commentForm) {
+        commentForm.style.display = commentForm.style.display === 'none' ? 'flex' : 'none';
+      }
+    }
+
+    function submitComment(userId, time, feedId) {
+      const commentInput = document.getElementById(`comment-input-${feedId}`);
+      const commentContent = commentInput.value.trim();
+      if (!commentContent) {
+        alert("請輸入留言內容");
+        return;
+      }
+
+      let arr = JSON.parse(localStorage.getItem(SHARED_KEY_PREFIX + userId) || "[]");
+      let idx = arr.findIndex(f => f.time == time);
+
+      if (idx > -1) {
+        arr[idx].comments = arr[idx].comments || [];
+        arr[idx].comments.push({ user: getCurrentUser().name, comment: commentContent, time: Date.now() });
+        localStorage.setItem(SHARED_KEY_PREFIX + userId, JSON.stringify(arr));
+
+        // Clear input and re-render comments for this feed
+        commentInput.value = "";
+        renderComments(feedId, arr[idx].comments);
+      }
+    }
+
+    function renderComments(feedId, comments) {
+      const commentList = document.getElementById(`comment-list-${feedId}`);
+      if (!commentList) return;
+
+      commentList.innerHTML = ""; // Clear existing comments
+
+      if (!comments || comments.length === 0) {
+        commentList.innerHTML = '<li style="color:#888;text-align:center;font-size:0.9em;">目前沒有留言。</li>';
+        return;
+      }
+
+      comments.sort((a, b) => a.time - b.time); // Sort comments by time
+
+      comments.forEach(c => {
+        commentList.innerHTML += `
+          <li class="comment-item">
+            <div class="comment-user">${escapeHtml(c.user)}</div>
+            <div class="comment-content">${escapeHtml(c.comment)}</div>
+            <div class="comment-meta">${timeAgo(c.time)}</div>
+          </li>
+        `;
+      });
+    }
+
+    // Modify commentFeed to toggle comment section instead of using prompt
+    function commentFeed(userId, time) {
+      const feedId = `${userId}-${time}`;
+      toggleCommentSection(feedId);
+    }
+
+
+    // =============== 智慧食譜生成器 =============== //
+    async function generateRecipe(userPrompt, modelId) {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [{ role: "user", content: userPrompt }],
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        let recipes;
+        try {
+          recipes = JSON.parse(data.choices[0].message.content);
+        } catch (e) {
+          const match = data.choices[0].message.content.match(/```json([\s\S]*?)```/);
+          if (match) recipes = JSON.parse(match[1]);
+          else throw new Error("回傳內容解析失敗");
+        }
+        return recipes;
+      } else {
+        throw new Error(`API 請求失敗：${response.statusText}`);
+      }
+    }
+    document.getElementById("recipeForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const generateBtn = document.getElementById('generate');
+      generateBtn.disabled = true;
+      showStatus({ loading: true, message: "正在嘗試模型...", error: "" });
+      clearRecipes();
+      const loadingTimer = setInterval(() => {
+        const loadingText = document.getElementById('loading-text');
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        loadingText.innerText = `生成中，請稍候... (${seconds}秒)`;
+      }, 1000);
+      const startTime = Date.now();
+      try {
+        const age = parseInt(document.getElementById("age").value, 10);
+        const allergens = document.getElementById("allergens").value.trim();
+        const goal = document.getElementById("goal").value;
+        const cuisineType = document.getElementById("cuisineType").value;
+        const prepTime = document.getElementById("prepTime").value;
+
+        // 獲取選取的食材列表
+        const ingredientsSelect = document.getElementById("ingredients");
+        let selectedIngredients = [];
+        if (ingredientsSelect.tagName.toLowerCase() === 'select' && ingredientsSelect.multiple) {
+            selectedIngredients = Array.from(ingredientsSelect.selectedOptions)
+                                   .map(option => option.value)
+                                   .filter(value => value !== ""); // 過濾掉預設選項
+        } else {
+             // 如果是文字輸入框 (例如沒有已登記食材時)，則直接取值
+             selectedIngredients = [ingredientsSelect.value.trim()].filter(value => value !== "");
+        }
+        const ingredientsString = selectedIngredients.join("、"); // 使用頓號分隔
+
+        const servings = document.getElementById("servings").value;
+        const flavorPreference = document.getElementById("flavorPreference").value;
+        const kitchenEquipment = document.getElementById("kitchenEquipment").value.trim();
+
+        if (!age || age < 1 || age > 120) throw new Error("請輸入1-120之間的有效年齡");
+
+        const userPrompt = getPrompt(age, allergens, goal, cuisineType, prepTime, ingredientsString, servings, flavorPreference, kitchenEquipment); // 傳遞組合好的食材字串
+
+        let recipes;
+        for (const model of modelList) {
+          try {
+            recipes = await generateRecipe(userPrompt, model.id);
+            if (recipes) break;
+          } catch (err) {
+          console.log(`模型 ${model.name} 失敗： ${err.message}`);
+          }
+        }
+        if (!recipes) throw new Error("所有模型皆失敗，請稍後再試");
+        displayRecipes(recipes);
+        saveGeneratedRecipes(recipes);
+        showStatus({ loading: false, message: "食譜已生成" });
+        document.getElementById('recipe-section-title').style.display = "block";
+      } catch (error) {
+        showStatus({ loading: false, error: error.message });
+      } finally {
+        clearInterval(loadingTimer);
+        generateBtn.disabled = false;
+      }
+    });
+    function getPrompt(age, allergens, goal, cuisineType, prepTime, ingredients, servings, flavorPreference, kitchenEquipment) {
+      let prompt = `
+我是一位新用戶，請根據下列條件生成3個推薦食譜（請使用繁體中文回應）：
+年齡: ${age}
+過敏原: ${allergens}
+飲食目標: ${goal}
+風味選擇: ${cuisineType}
+準備時間: ${prepTime}
+主要食材: ${ingredients}
+服務人數: ${servings}
+`;
+
+      if (flavorPreference) {
+        prompt += `口味偏好: ${flavorPreference}\n`;
+      }
+
+      if (kitchenEquipment) {
+        prompt += `可用的廚房設備: ${kitchenEquipment}\n`;
+      }
+
+      prompt += `
+每個食譜需包含：
+- 標題（title，使用繁體中文）
+- 所需食材及份量（ingredients，格式為陣列，每個元素為一個食材及其份量，例如 "雞胸肉 200克"）
+- 詳細製作步驟（steps，使用繁體中文，請用陣列，每個元素為一個步驟，盡量具體詳細）
+- 詳細營養資訊（nutrition，需包含熱量calories、蛋白質protein、碳水化合物carbs、脂肪fat、膳食纖維fiber、鈉sodium，單位分別為大卡、克、克、克、克、毫克）
+- 標籤（tags，使用繁體中文，請用陣列）
+*請只回傳JSON陣列，不要有多餘文字，也不需要圖片連結。*
+格式範例：
+[
+  {
+    "title": "番茄雞肉沙拉",
+    "ingredients": [
+      "雞胸肉 200克",
+      "番茄 2個",
+      "生菜 100克",
+      "橄欖油 1湯匙",
+      "檸檬汁 1茶匙"
+    ],
+    "steps": [
+      "將雞胸肉切片，用少許鹽和黑胡椒粉醃製5分鐘。",
+      "熱鍋後加入少許油，將雞肉煎至金黃熟透，取出切成條狀。",
+      "番茄洗淨切塊，生菜洗淨撕成小片。",
+      "將雞肉、番茄和生菜放入大碗中，加入橄欖油和檸檬汁拌勻。",
+      "最後撒上少許鹽調味即可享用。"
+    ],
+    "nutrition": {
+      "calories": 350,
+      "protein": 38,
+      "carbs": 15,
+      "fat": 14,
+      "fiber": 3,
+      "sodium": 200
+    },
+    "tags": ["低脂", "高蛋白", "減脂"]
+  }
+]
+      `.trim();
+      return prompt;
+    }
+    function showStatus({ loading = false, message = "", error = "" }) {
+      if (loading) {
+        document.getElementById('loading-message').style.display = "block";
+        document.getElementById('loading-text').innerText = "生成中，請稍候...";
+      } else {
+        document.getElementById('loading-message').style.display = "none";
+      }
+      if (message) {
+        document.getElementById('model-message').style.display = "block";
+        document.getElementById('model-message').innerText = message;
+      } else {
+        document.getElementById('model-message').style.display = "none";
+      }
+      if (error) {
+        document.getElementById('error-message').style.display = "block";
+        document.getElementById('error-message').innerText = error;
+      } else {
+        document.getElementById('error-message').style.display = "none";
+      }
+    }
+    function clearRecipes() {
+      document.getElementById("recipe-container").innerHTML = "";
+    }
+    function displayRecipes(recipes) {
+      const recipeContainer = document.getElementById("recipe-container");
+      if (!Array.isArray(recipes) || recipes.length === 0) {
+        recipeContainer.innerHTML = '<div class="error-message">查無推薦食譜，請嘗試修改條件！</div>';
+        return;
+      }
+      recipes.forEach(recipe => {
+        const steps = Array.isArray(recipe.steps) ? recipe.steps : [];
+        const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
+        const nutrition = recipe.nutrition || {};
+        const tags = Array.isArray(recipe.tags) ? recipe.tags : [];
+        const html = `
+          <div class="recipe-card">
+            <h3>${recipe.title}</h3>
+            <div class="recipe-ingredients">
+              <b>所需食材及份量：</b>
+              <ul style="padding-left:1.2em;margin:0 0 7px 0;">
+                ${ingredients.map(i => `<li>${i}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="step-title">製作步驟：</div>
+            <ol style="padding-left:1.2em;margin:0 0 7px 0;">
+              ${steps.map(s => `<li>${s}</li>`).join('')}
+            </ol>
+            <div class="recipe-nutrition">
+              <b>營養資訊：</b>
+              熱量：${nutrition.calories} 大卡，
+              蛋白質：${nutrition.protein} g，
+              碳水化合物：${nutrition.carbs} g，
+              脂肪：${nutrition.fat} g，
+              膳食纖維：${nutrition.fiber} g，
+              鈉：${nutrition.sodium} mg
+            </div>
+            <div class="recipe-tags">
+              <b>標籤：</b> ${tags.join(", ")}
+            </div>
+            <button class="button" onclick="saveRecipeToProfile(${JSON.stringify(recipe).replace(/"/g, "&quot;")})"><i class="fa fa-save"></i> 收藏到個人檔案</button>
+          </div>
+        `;
+        recipeContainer.insertAdjacentHTML('beforeend', html);
+      });
+    }
+    function saveRecipeToProfile(recipe) {
+      let userId = getCurrentUserId();
+      let arr = JSON.parse(localStorage.getItem(RECIPE_KEY_PREFIX + userId) || "[]");
+      if (arr.some(r => r.title === recipe.title)) {
+        alert("已收藏過這個食譜！");
+        return;
+      }
+      arr.unshift(recipe);
+      localStorage.setItem(RECIPE_KEY_PREFIX + userId, JSON.stringify(arr));
+      alert("已收藏到個人檔案！");
+      renderProfile();
+    }
+    function saveGeneratedRecipes(recipes) {
+      let userId = getCurrentUserId();
+      let arr = JSON.parse(localStorage.getItem(RECIPE_KEY_PREFIX + userId) || "[]");
+      for (let recipe of recipes) {
+        if (!arr.some(r => r.title === recipe.title)) arr.unshift(recipe);
+      }
+      localStorage.setItem(RECIPE_KEY_PREFIX + userId, JSON.stringify(arr));
+      renderProfile();
+    }
+
+    // ================ 食物管理 & 掃描 ================ //
+    function renderPantry() {
+      let userId = getCurrentUserId();
+      let pantry = JSON.parse(localStorage.getItem(PANTRY_KEY_PREFIX + userId) || "[]");
+      let expList = document.getElementById("expiring-foods");
+      expList.innerHTML = "";
+      let now = new Date();
+      let soonArr = pantry.filter(f => {
+        if (!f.expiry) return false;
+        let d = new Date(f.expiry);
+        let days = Math.round((d - now) / 86400000);
+        return days >= 0 && days <= 7;
+      });
+      if (soonArr.length === 0) expList.innerHTML = '<div style="color:#888;">目前沒有即將到期的食物。</div>';
+      soonArr.forEach(f => {
+        let d = new Date(f.expiry);
+        let days = Math.round((d - now) / 86400000);
+        expList.innerHTML += `
+          <div class="reminder-card">
+            <div>
+              <div class="details">${escapeHtml(f.name)}</div>
+              <div class="expiry">剩餘 ${days} 天</div>
+            </div>
+            <button onclick="sharePantryFood('${f.name}','${f.quantity}')">分享</button>
+          </div>
+        `;
+      });
+
+      // 渲染已過期食物列表
+      let expiredList = document.getElementById("expired-foods");
+      expiredList.innerHTML = "";
+      let expiredArr = pantry.filter(f => {
+        if (!f.expiry) return false;
+        let d = new Date(f.expiry);
+        // Set time to midnight for comparison
+        d.setHours(0, 0, 0, 0);
+        now.setHours(0, 0, 0, 0);
+        return d < now;
+      });
+      if (expiredArr.length === 0) {
+        expiredList.innerHTML = '<div style="color:#888;">目前沒有已過期的食物。</div>';
+      } else {
+        expiredArr.forEach(f => {
+          expiredList.innerHTML += `
+            <div class="list-item" style="border-left: 3px solid var(--error);">
+              <div class="title">${escapeHtml(f.name)}</div>
+              <div class="details">
+                已於 ${escapeHtml(f.expiry)} 過期
+                ${f.quantity ? `，數量：${escapeHtml(f.quantity)}` : ''}
+              </div>
+            </div>
+          `;
+        });
+      }
+
+
+      // 渲染所有食物列表
+      let allList = document.getElementById("all-foods");
+      allList.innerHTML = "";
+      if (pantry.length === 0) {
+        allList.innerHTML = '<div style="color:#888;">目前沒有任何食物。</div>';
+      } else {
+        pantry.forEach((f, index) => {
+          allList.innerHTML += `
+            <div class="list-item" style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="flex-grow: 1;">
+                <div class="title">${escapeHtml(f.name)}</div>
+                <div class="details">
+                  ${f.expiry ? `到期日：${escapeHtml(f.expiry)}` : '無到期日'}
+                  ${f.quantity ? `，數量：${escapeHtml(f.quantity)}` : ''}
+                </div>
+              </div>
+              <button class="button" style="background:#d90429; color:#fff; padding: 5px 10px; font-size: 0.9em; margin-left: 10px; margin-top: 0;" onclick="deletePantryFood(${index})">刪除</button>
+            </div>
+          `;
+        });
+      }
+    }
+    document.getElementById('btn-add-food').onclick = function() {
+      let name = document.getElementById('food-name').value.trim();
+      let expiry = document.getElementById('expiry-date').value;
+      let quantity = document.getElementById('quantity').value;
+      if (!name) {
+        alert("請填食物名稱");
+        return;
+      }
+      let userId = getCurrentUserId();
+      let arr = JSON.parse(localStorage.getItem(PANTRY_KEY_PREFIX + userId) || "[]");
+      arr.unshift({ name, expiry, quantity });
+      localStorage.setItem(PANTRY_KEY_PREFIX + userId, JSON.stringify(arr));
+
+      // 新增：將食材名稱加入到食材列表中
+      let ingredientsList = JSON.parse(localStorage.getItem(INGREDIENTS_KEY_PREFIX + userId) || "[]");
+      if (name && !ingredientsList.includes(name)) {
+        ingredientsList.push(name);
+        localStorage.setItem(INGREDIENTS_KEY_PREFIX + userId, JSON.stringify(ingredientsList));
+      }
+
+      renderPantry(); // 重新渲染食物列表
+      document.getElementById('food-name').value = "";
+      document.getElementById('expiry-date').value = "";
+      document.getElementById('quantity').value = "";
+    };
+
+    // 刪除食物功能
+    function deletePantryFood(index) {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+
+        let pantry = JSON.parse(localStorage.getItem(PANTRY_KEY_PREFIX + userId) || "[]");
+        if (index >= 0 && index < pantry.length) {
+            const foodName = pantry[index].name;
+            if (confirm(`確定要刪除食物 "${foodName}" 嗎？`)) {
+                pantry.splice(index, 1); // 移除指定索引的食物
+                localStorage.setItem(PANTRY_KEY_PREFIX + userId, JSON.stringify(pantry));
+                renderPantry(); // 重新渲染食物管理頁面
+                alert("食物已刪除！");
+            }
+        }
+    }
+
+    // 剷除已過期食物功能
+    document.getElementById('btn-clear-expired').onclick = function() {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+
+        let pantry = JSON.parse(localStorage.getItem(PANTRY_KEY_PREFIX + userId) || "[]");
+        const now = new Date();
+        now.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+
+        // Filter out expired foods
+        const nonExpiredPantry = pantry.filter(f => {
+            if (!f.expiry) return true; // Keep items without expiry date
+            const d = new Date(f.expiry);
+            d.setHours(0, 0, 0, 0);
+            return d >= now; // Keep items with expiry date in the future or today
+        });
+
+        if (nonExpiredPantry.length === pantry.length) {
+            alert("目前沒有已過期的食物需要剷除。");
+            return;
+        }
+
+        if (confirm("確定要剷除所有已過期的食物嗎？此操作無法復原。")) {
+            localStorage.setItem(PANTRY_KEY_PREFIX + userId, JSON.stringify(nonExpiredPantry));
+            renderPantry(); // 重新渲染食物管理頁面
+            alert("已過期食物已剷除！");
+        }
+    };
+
+    // 拍照識別功能
+    document.getElementById('btn-scan-photo').addEventListener('click', function() {
+      document.getElementById('photo-upload-input').click();
+    });
+
+    document.getElementById('photo-upload-input').addEventListener('change', async function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onloadend = async function() {
+        const base64Image = reader.result.split(',')[1]; // Get base64 string without data URL prefix
+        await analyzeFoodImage(base64Image);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function analyzeFoodImage(base64Image) {
+      const loadingMessage = document.getElementById('pantry-loading-message');
+      const errorMessage = document.getElementById('pantry-error-message');
+      const foodNameInput = document.getElementById('food-name');
+      const expiryDateInput = document.getElementById('expiry-date');
+      const quantityInput = document.getElementById('quantity');
+
+      loadingMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+      foodNameInput.value = '';
+      expiryDateInput.value = '';
+      quantityInput.value = '';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.0-flash-001", // 使用 Gemini 2.0 Flash 模型
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: "請分析這張食物包裝圖片，識別出食物名稱、到期日（如果圖片中有明確標示）和數量（如果圖片中有明確標示）。請以 JSON 格式回傳結果，包含 foodName (string), expiryDate (string, YYYY-MM-DD 格式，如果無法識別則為空字串), quantity (number, 如果無法識別則為 0)。例如：{\"foodName\": \"牛奶\", \"expiryDate\": \"2025-12-31\", \"quantity\": 1}" },
+                  { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Image}` } }
+                ]
+              }
+            ],
+            max_tokens: 300,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API 請求失敗：${response.statusText}`);
+        }
+
+        const data = await response.json();
+        let result;
+        try {
+          // Attempt to parse directly first
+          result = JSON.parse(data.choices[0].message.content);
+        } catch (e) {
+          // If direct parse fails, look for a JSON code block
+          const match = data.choices[0].message.content.match(/```json([\s\S]*?)```/);
+          if (match && match[1]) {
+            result = JSON.parse(match[1]);
+          } else {
+            // If no JSON code block found, throw an error
+            throw new Error("API 回傳內容解析失敗，非預期格式。");
+          }
+        }
+
+        if (result.foodName) foodNameInput.value = result.foodName;
+        if (result.expiryDate) expiryDateInput.value = result.expiryDate;
+        // Check if quantity is a number before setting the value
+        if (result.quantity !== undefined && typeof result.quantity === 'number') {
+            quantityInput.value = result.quantity;
+        } else {
+            // Optionally clear the quantity if it's not a valid number
+            quantityInput.value = '';
+        }
+
+        loadingMessage.style.display = 'none';
+        // Optionally show a success message
+        // loadingMessage.style.display = 'block';
+        // document.getElementById('pantry-loading-text').innerText = '識別完成！';
+        // setTimeout(() => loadingMessage.style.display = 'none', 2000);
+
+      } catch (error) {
+        loadingMessage.style.display = 'none';
+        errorMessage.style.display = 'block';
+        errorMessage.innerText = `圖片識別失敗：${error.message}`;
+        console.error("圖片識別失敗:", error);
+      }
+    }
+
+    document.getElementById('btn-scan-barcode').onclick = function() { document.getElementById('photo-upload-input').click(); };
+    function sharePantryFood(name, quantity) {
+      document.getElementById('modal-share').style.display = "flex";
+      document.getElementById('share-desc').value = `【即將到期食物】${name} 數量：${quantity}`;
+    }
+
+    // =============== 個人檔案 =============== //
+    function renderProfile() {
+      let user = getCurrentUser();
+      if (!user) return;
+      // 頭像渲染
+      const avatarImg = document.getElementById('profile-avatar');
+      const avatarUrl = getAvatarByUserId(user.id);
+      avatarImg.src = avatarUrl ? avatarUrl : "https://via.placeholder.com/80x80";
+      // 其他資訊
+      document.getElementById('profile-name').textContent = user.name;
+      document.getElementById('profile-email').textContent = user.email;
+      let recipes = JSON.parse(localStorage.getItem(RECIPE_KEY_PREFIX + user.id) || "[]");
+      let recipesDiv = document.getElementById('recipes');
+      recipesDiv.innerHTML = "";
+      if (recipes.length === 0) recipesDiv.innerHTML = "<div style='color:#888;'>目前尚未收藏食譜。</div>";
+      recipes.forEach((recipe, index) => {
+        recipesDiv.innerHTML += `
+          <div class="list-item" style="display: flex; justify-content: space-between; align-items: center;">
+            <div onclick="showFullRecipe(${index})" style="flex-grow: 1; cursor: pointer;">
+              <div class="title">${escapeHtml(recipe.title)}</div>
+              <div class="details">標籤：${recipe.tags ? escapeHtml(recipe.tags.join(", ")) : ""}</div>
+            </div>
+            <button class="button" style="background:#d90429; color:#fff; padding: 5px 10px; font-size: 0.9em; margin-left: 10px; margin-top: 0;" onclick="deleteRecipeFromProfile(${index})">刪除</button>
+          </div>
+        `;
+      });
+      let shared = JSON.parse(localStorage.getItem(SHARED_KEY_PREFIX + user.id) || "[]");
+      let sharedDiv = document.getElementById('shared');
+      sharedDiv.innerHTML = "";
+      if (shared.length === 0) sharedDiv.innerHTML = "<div style='color:#888;'>尚未發佈分享。</div>";
+      shared.forEach(feed => {
+        sharedDiv.innerHTML += `
+          <div class="list-item">
+            <div class="title">${escapeHtml(feed.desc)}</div>
+            <div class="details">發佈於：${timeAgo(feed.time)}</div>
+          </div>
+        `;
+      });
+      let coupons = JSON.parse(localStorage.getItem(COUPON_KEY_PREFIX + user.id) || "[]");
+      let couponsDiv = document.getElementById('coupons');
+      couponsDiv.innerHTML = "";
+      // 移除硬編碼的兌換券資料顯示
+      if (coupons.length === 0) couponsDiv.innerHTML = "<div style='color:#888;'>目前沒有兌換券。</div>"; // 顯示沒有兌換券的訊息
+      else coupons.forEach(c => { couponsDiv.innerHTML += `<div class="list-item"><div class="title">${escapeHtml(c.title)}</div><div class="details">有效期至：${escapeHtml(c.expiry)}</div></div>`; });
+      setupAvatarUpload();
+      renderNotificationStatus(); // 渲染通知開關狀態
+    }
+    function showProfileTab(tabId, e) {
+      // 移除所有 tab content 的 active class
+      document.querySelectorAll('.tab-content').forEach(d => d.classList.remove('active'));
+      // 為選中的 tab content 添加 active class
+      document.getElementById(tabId).classList.add('active');
+
+      // 移除所有 tab button 的 active class
+      document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+      // 為被點擊的 tab button 添加 active class
+      if (e && e.target.classList.contains('tab-button')) {
+        e.target.classList.add('active');
+      } else {
+        // 如果不是通過點擊按鈕觸發 (例如頁面載入時)，則找到對應的按鈕並添加 active class
+        const targetButton = document.querySelector(`.tabs button[onclick*="'${tabId}'"]`);
+        if (targetButton) {
+          targetButton.classList.add('active');
+        }
+      }
+    }
+    // 更新用戶資料功能
+    document.getElementById('btn-update-profile').onclick = function() {
+      let user = getCurrentUser();
+      if (!user) return;
+
+      // 彈出一個簡單的提示框讓用戶輸入新資料
+      // 實際應用中應使用更友好的模態框或頁面
+      let newName = prompt("請輸入新的姓名:", user.name);
+      if (newName === null) return; // 用戶取消
+
+      let newEmail = prompt("請輸入新的電子郵件:", user.email);
+      if (newEmail === null) return; // 用戶取消
+
+      let newAge = prompt("請輸入新的年齡:", user.age || '');
+      if (newAge === null) return; // 用戶取消
+      newAge = parseInt(newAge, 10);
+      if (isNaN(newAge) || newAge < 1 || newAge > 120) {
+          alert("年齡輸入無效，請輸入1-120之間的數字。");
+          return;
+      }
+
+      let newAllergens = prompt("請輸入新的過敏原（多個請用逗號分隔）:", user.allergens || '');
+      if (newAllergens === null) return; // 用戶取消
+
+      // 更新本地儲存的用戶資料
+      let users = getUsers();
+      let userIndex = users.findIndex(u => u.id === user.id);
+      if (userIndex > -1) {
+        users[userIndex].name = newName.trim();
+        users[userIndex].email = newEmail.trim();
+        users[userIndex].age = newAge;
+        users[userIndex].allergens = newAllergens.trim();
+        saveUsers(users);
+        setCurrentUser(users[userIndex]); // 更新當前用戶資訊
+        renderProfile(); // 重新渲染個人檔案頁面
+        alert("用戶資料已更新！");
+      } else {
+        alert("更新失敗，找不到用戶。");
+      }
+    };
+
+    // 通知開關功能
+    document.getElementById('btn-toggle-notification').onclick = async function() {
+      let userId = getCurrentUserId();
+      if (!userId) return;
+
+      let notificationsEnabled = localStorage.getItem(NOTIFICATION_KEY_PREFIX + userId) !== 'false';
+
+      if (!notificationsEnabled) { // 如果目前是關閉狀態，嘗試開啟並請求權限
+        if (Notification.permission === 'granted') {
+          notificationsEnabled = true;
+          showTemporaryMessage(`通知已開啟！`, 'success');
+        } else if (Notification.permission !== 'denied') {
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') {
+            notificationsEnabled = true;
+            showTemporaryMessage(`通知已開啟！`, 'success');
+          } else {
+            notificationsEnabled = false;
+            showTemporaryMessage(`無法開啟通知，請檢查瀏覽器設定。`, 'error');
+          }
+        } else {
+          notificationsEnabled = false;
+          showTemporaryMessage(`通知權限已被拒絕，請在瀏覽器設定中啟用。`, 'error');
+        }
+      } else { // 如果目前是開啟狀態，則關閉
+        notificationsEnabled = false;
+        showTemporaryMessage(`通知已關閉！`, 'success');
+      }
+
+      localStorage.setItem(NOTIFICATION_KEY_PREFIX + userId, notificationsEnabled);
+      renderNotificationStatus(); // 更新 UI 顯示狀態
+    };
+
+    // 顯示暫時訊息
+    function showTemporaryMessage(message, type = 'success') {
+        const successMessageEl = document.getElementById('login-success-message');
+        const errorMessageEl = document.getElementById('login-error-message');
+
+        // 隱藏所有訊息
+        successMessageEl.style.display = 'none';
+        errorMessageEl.style.display = 'none';
+
+        const targetEl = type === 'success' ? successMessageEl : errorMessageEl;
+        targetEl.textContent = message;
+        targetEl.style.display = 'block';
+
+        // 3秒後隱藏訊息
+        setTimeout(() => {
+            targetEl.style.display = 'none';
+        }, 3000);
+    }
+
+
+    // 渲染通知開關狀態
+    function renderNotificationStatus() {
+        const userId = getCurrentUserId();
+        const statusSpan = document.getElementById('notification-status');
+        if (!userId || !statusSpan) return;
+
+        const notificationsEnabled = localStorage.getItem(NOTIFICATION_KEY_PREFIX + userId) !== 'false';
+        statusSpan.textContent = notificationsEnabled ? '開啟' : '關閉';
+    }
+
+    // 檢查過期食物並發送通知
+    function checkExpiredFoodsAndNotify() {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+
+        const notificationsEnabled = localStorage.getItem(NOTIFICATION_KEY_PREFIX + userId) !== 'false';
+        if (!notificationsEnabled || Notification.permission !== 'granted') {
+            console.log("通知已關閉或未授權，不發送過期食物通知。");
+            return;
+        }
+
+        let pantry = JSON.parse(localStorage.getItem(PANTRY_KEY_PREFIX + userId) || "[]");
+        const now = new Date();
+        now.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+
+        const expiredFoods = pantry.filter(f => {
+            if (!f.expiry) return false;
+            const d = new Date(f.expiry);
+            d.setHours(0, 0, 0, 0);
+            return d < now;
+        });
+
+        if (expiredFoods.length > 0) {
+            const foodNames = expiredFoods.map(f => f.name).join('、');
+            const notificationTitle = '食物過期提醒';
+            const notificationOptions = {
+                body: `您的 ${foodNames} 已過期，請檢查食物管理列表。`,
+                icon: 'https://img.icons8.com/ios-filled/80/6a994e/chef-hat.png' // 使用應用程式圖標
+            };
+
+            try {
+                new Notification(notificationTitle, notificationOptions);
+                console.log("已發送過期食物通知。");
+            } catch (e) {
+                console.error("發送通知失敗:", e);
+            }
+        }
+    }
+
+    // 在新增食物時檢查並發送通知 (可選，但符合需求)
+    // 修改 btn-add-food 的點擊事件處理函式
+    document.getElementById('btn-add-food').onclick = function() {
+      let name = document.getElementById('food-name').value.trim();
+      let expiry = document.getElementById('expiry-date').value;
+      let quantity = document.getElementById('quantity').value;
+      if (!name) {
+        alert("請填食物名稱");
+        return;
+      }
+      let userId = getCurrentUserId();
+      let arr = JSON.parse(localStorage.getItem(PANTRY_KEY_PREFIX + userId) || "[]");
+      arr.unshift({ name, expiry, quantity });
+      localStorage.setItem(PANTRY_KEY_PREFIX + userId, JSON.stringify(arr));
+
+      // 新增：將食材名稱加入到食材列表中
+      let ingredientsList = JSON.parse(localStorage.getItem(INGREDIENTS_KEY_PREFIX + userId) || "[]");
+      if (name && !ingredientsList.includes(name)) {
+        ingredientsList.push(name);
+        localStorage.setItem(INGREDIENTS_KEY_PREFIX + userId, JSON.stringify(ingredientsList));
+      }
+
+      renderPantry(); // 重新渲染食物列表
+      document.getElementById('food-name').value = "";
+      document.getElementById('expiry-date').value = "";
+      document.getElementById('quantity').value = "";
+
+      // 新增食物後立即檢查是否有過期食物需要通知
+      checkExpiredFoodsAndNotify();
+    };
+
+
+    document.getElementById('btn-to-recipe').onclick = () => showPage('page-recipe');
+
+    // 刪除食譜功能
+    function deleteRecipeFromProfile(index) {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+
+        let recipes = JSON.parse(localStorage.getItem(RECIPE_KEY_PREFIX + userId) || "[]");
+        if (index >= 0 && index < recipes.length) {
+            const recipeTitle = recipes[index].title;
+            if (confirm(`確定要刪除食譜 "${recipeTitle}" 嗎？`)) {
+                recipes.splice(index, 1); // 移除指定索引的食譜
+                localStorage.setItem(RECIPE_KEY_PREFIX + userId, JSON.stringify(recipes));
+                renderProfile(); // 重新渲染個人檔案頁面
+                alert("食譜已刪除！");
+            }
+        }
+    }
+
+    // 顯示完整食譜
+    function showFullRecipe(index) {
+      const userId = getCurrentUserId();
+      if (!userId) return;
+      const recipes = JSON.parse(localStorage.getItem(RECIPE_KEY_PREFIX + userId) || "[]");
+      const recipe = recipes[index];
+
+      if (!recipe) return;
+
+      const modal = document.getElementById('modal-full-recipe');
+      const titleEl = document.getElementById('full-recipe-title');
+      const contentEl = document.getElementById('full-recipe-content');
+
+      titleEl.textContent = escapeHtml(recipe.title);
+
+      let ingredientsHtml = '<b>所需食材及份量：</b><ul style="padding-left:1.2em;margin:0 0 7px 0;">';
+      if (Array.isArray(recipe.ingredients)) {
+        ingredientsHtml += recipe.ingredients.map(i => `<li>${escapeHtml(i)}</li>`).join('');
+      }
+      ingredientsHtml += '</ul>';
+
+      let stepsHtml = '<div class="step-title">製作步驟：</div><ol style="padding-left:1.2em;margin:0 0 7px 0;">';
+      if (Array.isArray(recipe.steps)) {
+        stepsHtml += recipe.steps.map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      }
+      stepsHtml += '</ol>';
+
+      let nutritionHtml = '';
+      const nutrition = recipe.nutrition || {};
+      if (Object.keys(nutrition).length > 0) {
+        nutritionHtml = `
+          <div class="recipe-nutrition">
+            <b>營養資訊：</b>
+            熱量：${nutrition.calories || '-'} 大卡，
+            蛋白質：${nutrition.protein || '-'} g，
+            碳水化合物：${nutrition.carbs || '-'} g，
+            脂肪：${nutrition.fat || '-'} g，
+            膳食纖維：${nutrition.fib攻略er || '-'} g，
+            鈉：${nutrition.sodium || '-'} mg
+          </div>
+        `;
+      }
+
+      let tagsHtml = '';
+      if (Array.isArray(recipe.tags) && recipe.tags.length > 0) {
+        tagsHtml = `<div class="recipe-tags"><b>標籤：</b> ${escapeHtml(recipe.tags.join(", "))}</div>`;
+      }
+
+
+      contentEl.innerHTML = ingredientsHtml + stepsHtml + nutritionHtml + tagsHtml;
+      modal.style.display = 'flex'; // Show the modal
+    }
+
+    // 關閉完整食譜模態框
+    document.getElementById('btn-close-full-recipe').onclick = function() {
+      document.getElementById('modal-full-recipe').style.display = 'none';
+    };
+
+    // 新增：點擊模態框外部關閉
+    document.getElementById('modal-full-recipe').addEventListener('click', function(event) {
+      if (event.target === this) {
+        this.style.display = 'none';
+      }
+    });
+
+    // 新增：渲染食材下拉選單
+    function renderIngredientsSelect() {
+      const userId = getCurrentUserId();
+      if (!userId) return;
+
+      const ingredientsList = JSON.parse(localStorage.getItem(INGREDIENTS_KEY_PREFIX + userId) || "[]");
+      const ingredientsInput = document.getElementById('ingredients');
+      const formGroup = ingredientsInput.closest('.form-group');
+
+      // 如果食材列表為空，保留 input 框
+      if (ingredientsList.length === 0) {
+        // 確保是 input 框
+        if (ingredientsInput.tagName.toLowerCase() !== 'input') {
+           // 如果是 select，換回 input
+           const newInput = document.createElement('input');
+           newInput.type = 'text';
+           newInput.id = 'ingredients';
+           newInput.name = 'ingredients';
+           newInput.placeholder = '例如：雞肉、番茄';
+           newInput.autocomplete = 'off';
+           formGroup.replaceChild(newInput, ingredientsInput);
+        }
+        return;
+      }
+
+      // 如果已經是 select 框，且選項正確，則不重複渲染
+      if (ingredientsInput.tagName.toLowerCase() === 'select') {
+          const options = Array.from(ingredientsInput.options).map(opt => opt.value).filter(val => val !== '');
+          if (options.length === ingredientsList.length && options.every(val => ingredientsList.includes(val))) {
+              return; // 選項一致，無需更新
+          }
+      }
+
+
+      // 創建新的 select 元素
+      const selectElement = document.createElement('select');
+      selectElement.id = 'ingredients';
+      selectElement.name = 'ingredients';
+
+      // 添加預設選項
+      const defaultOption = document.createElement('option');
+      defaultOption.value = "";
+      defaultOption.text = "請選擇食材 或 輸入食材";
+      selectElement.appendChild(defaultOption);
+
+      // 添加食材選項
+      ingredientsList.forEach(ingredient => {
+        const option = document.createElement('option');
+        option.value = ingredient;
+        option.text = ingredient;
+        selectElement.appendChild(option);
+      });
+
+      // 替換原有的 input 元素
+      formGroup.replaceChild(selectElement, ingredientsInput);
+
+      // 添加一個 input 框用於手動輸入，並在選擇 "輸入食材" 時顯示
+      let manualInput = formGroup.querySelector('.manual-ingredients-input');
+      if (!manualInput) {
+          manualInput = document.createElement('input');
+          manualInput.type = 'text';
+          manualInput.className = 'manual-ingredients-input';
+          manualInput.placeholder = '輸入食材（例如：雞肉、番茄）';
+          manualInput.style.display = 'none'; // 預設隱藏
+          manualInput.style.marginTop = '5px';
+          formGroup.appendChild(manualInput);
+      }
+
+      // 監聽 select 的變化
+      selectElement.addEventListener('change', function() {
+          if (this.value === "") {
+              manualInput.style.display = 'block';
+              manualInput.value = ''; // 清空手動輸入框
+          } else {
+              manualInput.style.display = 'none';
+              manualInput.value = this.value; // 將選擇的值放入手動輸入框 (可選，看需求)
+          }
+      });
+
+       // 確保在頁面載入時根據 select 的初始值決定是否顯示手動輸入框
+       if (selectElement.value === "") {
+           manualInput.style.display = 'block';
+       } else {
+           manualInput.style.display = 'none';
+       }
+    }
+
+
+    // ================= 通用工具 ================= //
+    function timeAgo(time) {
+      let now = Date.now();
+      let diff = Math.round((now - time) / 1000);
+      if (diff < 60) return diff + "秒前";
+      if (diff < 3600) return Math.floor(diff / 60) + "分鐘前";
+      if (diff < 86400) return Math.floor(diff / 3600) + "小時前";
+      if (diff < 2592000) return Math.floor(diff / 86400) + "天前";
+      let d = new Date(time);
+      return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    }
+    function escapeHtml(str) {
+      return str.replace(/[&<>"'`]/g, (c) => {
+        return {
+          '&': '&',
+          '<': '<',
+          '>': '>',
+          '"': '"',
+          '\'': '&#39;',
+          '`': '&#96;'
+        }[c];
+      });
+    }
+  </script>
+</body>
+</html>
